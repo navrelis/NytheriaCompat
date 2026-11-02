@@ -1,0 +1,32 @@
+{
+    "schemaVersion": 1,
+    "id": "knit-loader",
+    "version": "${version}",
+    "name": "Knit Loader",
+    "description": "Library for loading mods made for other mod loaders on Fabric.",
+    "authors": [
+        "BluSpring"
+    ],
+    "license": "MIT",
+    "icon": "assets/knit_loader/icon.png",
+    "environment": "*",
+    "entrypoints": {
+        "afl:prePrePreLaunch": [
+            "xyz.bluspring.knit.loader.fabric.KnitEarlierInitializer"
+        ]
+    },
+    "mixins": [
+        "knit_loader.fabric.mixins.json"
+    ],
+    "depends": {
+        "fabricloader": ">=${loader_version}",
+        "fabric-api": ">=${fabric_version}",
+        "minecraft": ">=${minecraft_version}",
+        "fabric-language-kotlin": ">=${fabric_kotlin_version}"
+    },
+    "custom": {
+        "modmenu": {
+            "badges": [ "library" ]
+        }
+    }
+}

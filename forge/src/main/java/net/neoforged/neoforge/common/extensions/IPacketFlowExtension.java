@@ -1,0 +1,53 @@
+/*
+ * Copyright (c) NeoForged and contributors
+ * SPDX-License-Identifier: LGPL-2.1-only
+ */
+
+/*
+ * Changed by the Nytheria Compat project between 2026-09-29 and 2026-11-02; see docs/CHANGES.md.
+ * Based on NeoForge by NeoForged, as ported by KiltMC (see VENDORED.md). Licensed under the GNU LGPL 2.1.
+ */
+
+package net.neoforged.neoforge.common.extensions;
+
+import net.neoforged.fml.LogicalSide;
+
+import net.minecraft.network.protocol.PacketFlow;
+
+/**
+ * Extension for {@link PacketFlow} to add some utility methods.
+ */
+public interface IPacketFlowExtension {
+    /**
+     * {@return the {@link PacketFlow} this extension is applied to}
+     */
+    private PacketFlow self() { // Nytheria Compat: make private cuz otherwise things panic
+        return (PacketFlow) this;
+    }
+
+    // Nytheria Compat: unfortunately, people actually use this shit! :D
+    default PacketFlow neoforge$self() {
+        return self();
+    }
+
+    /**
+     * {@return an indication of whether this {@link PacketFlow} is clientbound}
+     */
+    default boolean isClientbound() {
+        return self() == PacketFlow.CLIENTBOUND;
+    }
+
+    /**
+     * {@return an indication of whether this {@link PacketFlow} is serverbound}
+     */
+    default boolean isServerbound() {
+        return self() == PacketFlow.SERVERBOUND;
+    }
+
+    /**
+     * {@return the {@link LogicalSide} that is receiving packets in this {@link PacketFlow}}
+     */
+    default LogicalSide getReceptionSide() {
+        return isServerbound() ? LogicalSide.SERVER : LogicalSide.CLIENT;
+    }
+}

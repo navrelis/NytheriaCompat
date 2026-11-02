@@ -1,0 +1,8 @@
+{
+    "package": "dev.nytheria.compat.transform",
+    "java": [
+        "nightconfig.ConfigParserTransform",
+        "mixin.MixinInfoTransform"
+    ],
+    "mixins": []
+}

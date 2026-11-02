@@ -1,0 +1,8 @@
+# Allowed violations of HookRulesTest, the state when the check was added. E2 shrinks this list to empty.
+# overwrite <class>#<method><desc>: @Overwrite
+# redirect <class>#<method><desc>: @Redirect on a vanilla class
+# post <class>#<method><desc>: NeoForge.EVENT_BUS.post without EventGate.has before it in the method
+# redeclare <interface>#<method><desc> <interface it repeats>: an extension interface a mixin implements declares a method of a Fabric API or vanilla interface (rule H7)
+redeclare net/neoforged/neoforge/client/model/IDynamicBakedModel#getQuads(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/core/Direction;Lnet/minecraft/util/RandomSource;)Ljava/util/List; net/minecraft/client/resources/model/BakedModel
+redeclare net/neoforged/neoforge/common/extensions/IItemExtension#getRecipeRemainder(Lnet/minecraft/world/item/ItemStack;)Lnet/minecraft/world/item/ItemStack; net/fabricmc/fabric/api/item/v1/FabricItem
+redeclare net/neoforged/neoforge/registries/IRegistryExtension#addAlias(Lnet/minecraft/resources/ResourceLocation;Lnet/minecraft/resources/ResourceLocation;)V net/fabricmc/fabric/api/event/registry/FabricRegistry

@@ -1,0 +1,29 @@
+{
+    "schemaVersion": 1,
+    "id": "nytheria_compat_neoforge_config",
+    "version": "${version}",
+    "name": "Nytheria Compat: NeoForge Config API",
+    "description": "Reimplements the NeoForge Config API while also adding support for Fabric mods that rely on Forge Config API Port.",
+    "authors": [
+        "BluSpring"
+    ],
+    "license": "MIT",
+    "icon": "icon.png",
+    "environment": "*",
+    "entrypoints": {
+    },
+    "depends": {
+        "fabricloader": ">=${loader_version}",
+        "minecraft": "${minecraft_version}",
+        "fabric-language-kotlin": ">=${fabric_kotlin_version}",
+        "nytheria_compat": "*"
+    },
+    "custom": {
+        "modmenu": {
+            "parent": "nytheria_compat"
+        }
+    },
+    "mixins": [
+        "nytheria_compat_neo_config_compat.mixins.json"
+    ]
+}

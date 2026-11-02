@@ -1,0 +1,90 @@
+# Changed by the Nytheria Compat project between 2026-09-29 and 2026-11-02; see docs/CHANGES.md.
+# Based on Kilt by KiltMC (https://github.com/KiltMC/Kilt). Licensed under the GNU LGPL 2.1.
+
+name: Bug report
+description: A problem with one of the four NeoForge mods that Nytheria Compat runs for the Nytheria modpack.
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Before you open this report
+
+        - Search the existing issues first. If you find the same problem, add your details there instead.
+        - Use the latest Nytheria Compat version and check that your problem still happens with it.
+        - Nytheria Compat is an internal dependency of the Nytheria modpack. Only problems with its four supported NeoForge mods in the Nytheria modpack are in scope: L_Ender's Cataclysm 3.33, Astral Dimension 3.0, Lionfish API 3.1 and Curios 9.5.1. Any other NeoForge mod is refused by design, so reports about other mods are out of scope.
+        - Report problems here, **not** to the Kilt authors and **not** to the authors of the four mods. Bugs in Nytheria Compat are Nytheria's, and the mod authors do not support Fabric.
+        - Remove other mods one by one if you can, and tell us which ones are needed to reproduce the problem.
+  - type: input
+    id: minecraft
+    attributes:
+      label: Minecraft version
+      placeholder: "1.21.1"
+    validations:
+      required: true
+  - type: input
+    id: loader
+    attributes:
+      label: Fabric Loader version
+      placeholder: "0.19.5"
+    validations:
+      required: true
+  - type: input
+    id: nytheria_compat
+    attributes:
+      label: Nytheria Compat version
+      description: The full version, as in the file name of the jar in your `mods` folder.
+      placeholder: "1.0.0+mc1.21.1"
+    validations:
+      required: true
+  - type: dropdown
+    id: neoforge-mods
+    attributes:
+      label: Supported mods involved
+      description: Which of the four supported mods are involved? Add their versions in "Additional information" if they differ from the list above.
+      multiple: true
+      options:
+        - L_Ender's Cataclysm
+        - Astral Dimension
+        - Lionfish API
+        - Curios
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behaviour
+      description: What did you expect to happen? If it works on NeoForge, please say so.
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behaviour
+      description: What happened instead?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Keep the steps short and clear, so that someone else can repeat them.
+      placeholder: |
+        1. Start a new world
+        2. ...
+        3. ...
+    validations:
+      required: true
+  - type: textarea
+    id: log
+    attributes:
+      label: latest.log
+      description: Drag the `latest.log` file from your game's `logs` folder into this box, or upload it to a paste service such as https://mclo.gs and paste the link.
+    validations:
+      required: true
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional information
+      description: The rest of your mod list (Fabric mods too), your Java version, screenshots, videos, or anything else that helps.

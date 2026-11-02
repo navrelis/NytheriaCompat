@@ -1,0 +1,80 @@
+/*
+ * Copyright (c) NeoForged and contributors
+ * SPDX-License-Identifier: LGPL-2.1-only
+ */
+
+/*
+ * Changed by the Nytheria Compat project between 2026-09-29 and 2026-11-02; see docs/CHANGES.md.
+ * Based on NeoForge by NeoForged, as ported by KiltMC (see VENDORED.md). Licensed under the GNU LGPL 2.1.
+ */
+
+package net.neoforged.neoforge.client.textures;
+
+import java.util.Map;
+
+import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
+import org.jetbrains.annotations.ApiStatus;
+
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.block.LiquidBlockRenderer;
+import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
+import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.material.FluidState;
+
+/**
+ * Helper class for safely accessing fluid textures on a render worker (such as in {@link LiquidBlockRenderer})
+ * to avoid potential issues when a chunk gets re-batched while resources are being reloaded.
+ */
+public final class FluidSpriteCache {
+    private static Map<ResourceLocation, TextureAtlasSprite> textureLookup = Map.of();
+    private static TextureAtlasSprite missingSprite = null;
+
+    /**
+     * {@return an array holding the still sprite, the flowing sprite and the overlay sprite (if specified,
+     * otherwise null) of the given fluid at the given position}
+     */
+    public static TextureAtlasSprite[] getFluidSprites(BlockAndTintGetter level, BlockPos pos, FluidState fluid) {
+        IClientFluidTypeExtensions props = IClientFluidTypeExtensions.of(fluid);
+
+        // Nytheria Compat: Some mods rely on this data really early, let's do an early return.
+        if (level == null || pos == null || fluid == null) {
+            ResourceLocation overlay = props.getOverlayTexture();
+            Map<ResourceLocation, TextureAtlasSprite> textures = textureLookup;
+            return new TextureAtlasSprite[] {
+                textures.getOrDefault(props.getStillTexture(), missingSprite),
+                textures.getOrDefault(props.getFlowingTexture(), missingSprite),
+                overlay == null ? null : textures.getOrDefault(overlay, missingSprite)
+            };
+        }
+
+        ResourceLocation overlay = props.getOverlayTexture(fluid, level, pos);
+        Map<ResourceLocation, TextureAtlasSprite> textures = textureLookup;
+
+        return new TextureAtlasSprite[] {
+                textures.getOrDefault(props.getStillTexture(fluid, level, pos), missingSprite),
+                textures.getOrDefault(props.getFlowingTexture(fluid, level, pos), missingSprite),
+                overlay == null ? null : textures.getOrDefault(overlay, missingSprite),
+        };
+    }
+
+    /**
+     * {@return a specified sprite or a missing sprite texture if sprite is not found}
+     */
+    public static TextureAtlasSprite getSprite(ResourceLocation texture) {
+        return textureLookup.getOrDefault(texture, missingSprite);
+    }
+
+    @ApiStatus.Internal
+    @SuppressWarnings("deprecation")
+    public static void reload() {
+        TextureAtlas atlas = Minecraft.getInstance().getModelManager().getAtlas(TextureAtlas.LOCATION_BLOCKS);
+        textureLookup = atlas.getTextures();
+        missingSprite = textureLookup.get(MissingTextureAtlasSprite.getLocation());
+    }
+
+    private FluidSpriteCache() {}
+}

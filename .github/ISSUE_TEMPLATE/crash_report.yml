@@ -1,0 +1,83 @@
+# Changed by the Nytheria Compat project between 2026-09-29 and 2026-11-02; see docs/CHANGES.md.
+# Based on Kilt by KiltMC (https://github.com/KiltMC/Kilt). Licensed under the GNU LGPL 2.1.
+
+name: Crash report
+description: The game or the server crashes or does not start with Nytheria Compat and the Nytheria modpack.
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Before you open this report
+
+        - Search the existing issues first. If you find the same crash, add your details there instead.
+        - Use the latest Nytheria Compat version and check that the crash still happens with it.
+        - Nytheria Compat is an internal dependency of the Nytheria modpack. Only problems with its four supported NeoForge mods in the Nytheria modpack are in scope: L_Ender's Cataclysm 3.33, Astral Dimension 3.0, Lionfish API 3.1 and Curios 9.5.1. Any other NeoForge mod is refused by design, so reports about other mods are out of scope.
+        - Report crashes here, **not** to the Kilt authors and **not** to the authors of the four mods. Bugs in Nytheria Compat are Nytheria's, and the mod authors do not support Fabric.
+  - type: input
+    id: minecraft
+    attributes:
+      label: Minecraft version
+      placeholder: "1.21.1"
+    validations:
+      required: true
+  - type: input
+    id: loader
+    attributes:
+      label: Fabric Loader version
+      placeholder: "0.19.5"
+    validations:
+      required: true
+  - type: input
+    id: nytheria_compat
+    attributes:
+      label: Nytheria Compat version
+      description: The full version, as in the file name of the jar in your `mods` folder.
+      placeholder: "1.0.0+mc1.21.1"
+    validations:
+      required: true
+  - type: dropdown
+    id: neoforge-mods
+    attributes:
+      label: Supported mods installed
+      description: Which of the four supported mods are involved? Add their versions in "Additional information" if they differ from the list above.
+      multiple: true
+      options:
+        - L_Ender's Cataclysm
+        - Astral Dimension
+        - Lionfish API
+        - Curios
+    validations:
+      required: true
+  - type: textarea
+    id: crash-report
+    attributes:
+      label: Crash report
+      description: >-
+        Drag the newest file from your game's `crash-reports` folder into this box, or upload it to a paste service such
+        as https://mclo.gs and paste the link. A message like "Exit code 0" from your launcher is not a crash report.
+        If there is no crash report (for example when the game fails during start-up), leave this empty and attach the
+        `latest.log` below.
+  - type: textarea
+    id: log
+    attributes:
+      label: latest.log
+      description: Drag the `latest.log` file from your game's `logs` folder into this box, or upload it to a paste service and paste the link.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: What were you doing when it crashed? Does it happen every time?
+      placeholder: |
+        1. Start the game with the mods above
+        2. ...
+    validations:
+      required: true
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional information
+      description: The rest of your mod list (Fabric mods too), your Java version, or anything else that helps.

@@ -1,0 +1,145 @@
+/*
+ * Copyright (c) NeoForged and contributors
+ * SPDX-License-Identifier: LGPL-2.1-only
+ */
+
+/*
+ * Changed by the Nytheria Compat project between 2026-09-29 and 2026-11-02; see docs/CHANGES.md.
+ * Based on NeoForge by NeoForged, as ported by KiltMC (see VENDORED.md). Licensed under the GNU LGPL 2.1.
+ */
+
+package net.neoforged.neoforge.client.gui;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.function.BooleanSupplier;
+
+import net.neoforged.fml.ModLoader;
+import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
+import net.neoforged.neoforge.client.event.RenderGuiEvent;
+import net.neoforged.neoforge.client.event.RenderGuiLayerEvent;
+import net.neoforged.neoforge.common.NeoForge;
+import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
+
+import net.minecraft.client.DeltaTracker;
+import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.LayeredDraw;
+import net.minecraft.resources.ResourceLocation;
+
+/**
+ * Adaptation of {@link LayeredDraw} that is used for {@link Gui} rendering specifically,
+ * to give layers a name and fire appropriate events.
+ *
+ * <p>Overlays can be registered using the {@link RegisterGuiLayersEvent} event.
+ */
+@ApiStatus.Internal
+public class GuiLayerManager {
+    // Nytheria Compat: Add empty layer
+    public static final LayeredDraw.Layer NYTHERIACOMPAT_EMPTY_LAYER = (guiGraphics, deltaTracker) -> {};
+
+    // Nytheria Compat: A layer's name is found by identity, so a layer that is drawn needs an instance of its own
+    public static LayeredDraw.Layer nytheriacompat$newEmptyLayer() {
+        return new LayeredDraw.Layer() {
+            @Override
+            public void render(GuiGraphics guiGraphics, DeltaTracker deltaTracker) {
+            }
+        };
+    }
+
+    public static final float Z_SEPARATION = LayeredDraw.Z_SEPARATION;
+    private final List<NamedLayer> layers = new ArrayList<>();
+    private boolean initialized = false;
+
+    public record NamedLayer(ResourceLocation name, LayeredDraw.Layer layer, boolean isVanilla) {
+        // Nytheria Compat: Add component for differentiating between Vanilla and not
+        public NamedLayer(ResourceLocation name, LayeredDraw.Layer layer) {
+            this(name, layer, false);
+        }
+    }
+
+    public GuiLayerManager add(ResourceLocation name, LayeredDraw.Layer layer) {
+        this.layers.add(new NamedLayer(name, layer));
+        return this;
+    }
+
+    public GuiLayerManager add(ResourceLocation name, LayeredDraw.Layer layer, boolean isVanilla) {
+        this.layers.add(new NamedLayer(name, layer, isVanilla));
+        return this;
+    }
+
+    public GuiLayerManager nytheriacompat$addVanilla(ResourceLocation id) {
+        this.layers.add(new NamedLayer(id, NYTHERIACOMPAT_EMPTY_LAYER, true));
+        return this;
+    }
+
+    public GuiLayerManager nytheriacompat$addVanilla(ResourceLocation id, LayeredDraw.Layer layer) {
+        this.layers.add(new NamedLayer(id, layer, true));
+        return this;
+    }
+
+    public GuiLayerManager add(GuiLayerManager child, BooleanSupplier shouldRender) {
+        // Flatten the layers to allow mods to insert layers between vanilla layers.
+        for (var entry : child.layers) {
+            add(entry.name(), (guiGraphics, partialTick) -> {
+                if (shouldRender.getAsBoolean()) {
+                    entry.layer().render(guiGraphics, partialTick);
+                }
+            }, entry.isVanilla());
+        }
+        return this;
+    }
+
+    public void render(GuiGraphics guiGraphics, DeltaTracker partialTick) {
+        if (NeoForge.EVENT_BUS.post(new RenderGuiEvent.Pre(guiGraphics, partialTick)).isCanceled()) {
+            return;
+        }
+
+        renderInner(guiGraphics, partialTick);
+
+        NeoForge.EVENT_BUS.post(new RenderGuiEvent.Post(guiGraphics, partialTick));
+    }
+
+    private void renderInner(GuiGraphics guiGraphics, DeltaTracker partialTick) {
+        guiGraphics.pose().pushPose();
+
+        for (var layer : this.layers) {
+            if (!NeoForge.EVENT_BUS.post(new RenderGuiLayerEvent.Pre(guiGraphics, partialTick, layer.name(), layer.layer())).isCanceled()) {
+                layer.layer().render(guiGraphics, partialTick);
+                NeoForge.EVENT_BUS.post(new RenderGuiLayerEvent.Post(guiGraphics, partialTick, layer.name(), layer.layer()));
+            }
+
+            guiGraphics.pose().translate(0.0F, 0.0F, Z_SEPARATION);
+        }
+
+        guiGraphics.pose().popPose();
+    }
+
+    public void initModdedLayers() {
+        if (initialized) {
+            throw new IllegalStateException("Duplicate initialization of NamedLayeredDraw");
+        }
+        initialized = true;
+        ModLoader.postEvent(new RegisterGuiLayersEvent(this.layers));
+    }
+
+    public int getLayerCount() {
+        return this.layers.size();
+    }
+
+    public @Nullable NamedLayer nytheriacompat$findNamedLayer(LayeredDraw.Layer layer) {
+        for (NamedLayer named : layers) {
+            if (named.layer() == layer) {
+                return named;
+            }
+        }
+
+        return null;
+    }
+
+    public Collection<NamedLayer> nytheriacompat$getLayers() {
+        return this.layers;
+    }
+}

@@ -1,0 +1,191 @@
+// TRACKED HASH: 399562caae5944ef11e0759f3ce9d673134c41a2
+/*
+ * Changed by the Nytheria Compat project between 2026-09-29 and 2026-11-02; see docs/CHANGES.md.
+ * Based on Kilt by KiltMC (https://github.com/KiltMC/Kilt). Licensed under the GNU LGPL 2.1.
+ */
+
+package dev.nytheria.compat.injects.core;
+
+import java.util.Map;
+
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import com.llamalad7.mixinextras.sugar.Local;
+import com.llamalad7.mixinextras.sugar.Share;
+import com.llamalad7.mixinextras.sugar.ref.LocalRef;
+import it.unimi.dsi.fastutil.objects.ObjectList;
+import it.unimi.dsi.fastutil.objects.Reference2IntMap;
+import net.neoforged.neoforge.registries.BaseMappedRegistry;
+import net.neoforged.neoforge.registries.IRegistryExtension;
+import net.neoforged.neoforge.registries.datamaps.DataMapType;
+import org.jetbrains.annotations.Nullable;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import dev.nytheria.compat.helpers.mixin.Extends;
+import dev.nytheria.compat.injections.core.MappedRegistryInjection;
+
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.MappedRegistry;
+import net.minecraft.core.RegistrationInfo;
+import net.minecraft.core.Registry;
+import net.minecraft.core.WritableRegistry;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
+
+@Extends(BaseMappedRegistry.class)
+@Mixin(MappedRegistry.class)
+public abstract class MappedRegistryInject<T> implements MappedRegistryInjection<T>, WritableRegistry<T>, IRegistryExtension<T> {
+    @Shadow @Nullable private Map<T, Holder.Reference<T>> unregisteredIntrusiveHolders;
+
+    @Shadow protected abstract void validateWrite();
+
+    @Shadow @Final private ObjectList<Holder.Reference<T>> byId;
+    @Shadow @Final private Reference2IntMap<T> toId;
+    @Shadow @Final private Map<ResourceLocation, Holder.Reference<T>> byLocation;
+    @Shadow @Final private Map<ResourceKey<T>, Holder.Reference<T>> byKey;
+    @Shadow @Final private Map<T, Holder.Reference<T>> byValue;
+    @Shadow private volatile Map<TagKey<T>, HolderSet.Named<T>> tags;
+
+    @Shadow protected abstract void validateWrite(ResourceKey<T> resourceKey);
+
+    @Shadow
+    private boolean frozen;
+    @Unique private final ThreadLocal<Integer> nytheriacompat$id = new ThreadLocal<>();
+
+    @Override
+    public Holder.Reference<T> register(int id, ResourceKey<T> key, T value, RegistrationInfo info) {
+        if (id > this.getMaxId()) {
+            throw new IllegalStateException(String.format(java.util.Locale.ENGLISH, "Invalid id %d - maximum id range of %d exceeded.", id, this.getMaxId()));
+        }
+
+        this.nytheriacompat$id.set(id);
+        var holder = register(key, value, info);
+        this.nytheriacompat$id.remove();
+
+        return holder;
+    }
+
+    @ModifyExpressionValue(method = "register", at = @At(value = "INVOKE", target = "Ljava/util/Map;computeIfAbsent(Ljava/lang/Object;Ljava/util/function/Function;)Ljava/lang/Object;", ordinal = 0))
+    private <V> V nytheriacompat$bindReferenceValueImmediately(V original, @Local(argsOnly = true) T value) {
+        if (original instanceof Holder.Reference<?> reference) {
+            ((Holder.Reference<T>) reference).bindValue(value);
+        }
+
+        return original;
+    }
+
+    @ModifyExpressionValue(method = "register", at = @At(value = "INVOKE", target = "Lit/unimi/dsi/fastutil/objects/ObjectList;size()I", ordinal = 0))
+    private int nytheriacompat$useForgeIdValue(int original) {
+        if (this.nytheriacompat$id.get() != null) {
+            return this.nytheriacompat$id.get();
+        }
+
+        return original;
+    }
+
+    @Inject(method = "register", at = @At("TAIL"))
+    private void nytheriacompat$callNeoAddCallbacks(ResourceKey<T> key, T value, RegistrationInfo registrationInfo, CallbackInfoReturnable<Holder.Reference<T>> cir, @Local int id) {
+        ((BaseMappedRegistry<T>) (Object) this).addCallbacks.forEach(callback -> callback.onAdd(this, id, key, value));
+    }
+
+    @ModifyVariable(method = {"get(Lnet/minecraft/resources/ResourceKey;)Ljava/lang/Object;", "getHolder(Lnet/minecraft/resources/ResourceKey;)Ljava/util/Optional;", "getOrCreateHolderOrThrow"}, at = @At("HEAD"), argsOnly = true)
+    private ResourceKey<T> nytheriacompat$resolveKey(ResourceKey<T> value) {
+        // vanilla's get(ResourceKey) and getHolder(ResourceKey) accept null (@Nullable), only the alias lookup does not
+        return value != null ? resolve(value) : null;
+    }
+
+    @ModifyVariable(method = {"get(Lnet/minecraft/resources/ResourceLocation;)Ljava/lang/Object;", "getHolder(Lnet/minecraft/resources/ResourceLocation;)Ljava/util/Optional;"}, at = @At("HEAD"), argsOnly = true)
+    private ResourceLocation nytheriacompat$resolveLocation(ResourceLocation value) {
+        if (value != null)
+            return resolve(value);
+        else
+            return null;
+    }
+
+    // Nytheria Compat: force store unregisteredIntrusiveHolders
+    @Inject(method = "freeze", at = @At("HEAD"))
+    private void nytheriacompat$disableNullRegister(CallbackInfoReturnable<Registry<T>> cir, @Share("nytheriacompat$unregisteredIntrusiveHolders") LocalRef<Map<T, Holder.Reference<T>>> unregistered) {
+        unregistered.set(this.unregisteredIntrusiveHolders);
+    }
+
+    @Inject(method = "freeze", at = @At(value = "RETURN", ordinal = 1))
+    private void nytheriacompat$forceSetUnregistered(CallbackInfoReturnable<Registry<T>> cir, @Share("nytheriacompat$unregisteredIntrusiveHolders") LocalRef<Map<T, Holder.Reference<T>>> unregistered) {
+        this.unregisteredIntrusiveHolders = unregistered.get();
+        ((BaseMappedRegistry<T>) (Object) this).bakeCallbacks.forEach(callback -> callback.onBake(this));
+    }
+
+    public void clear(boolean full) {
+        this.validateWrite();
+        ((BaseMappedRegistry<T>) (Object) this).clearCallbacks.forEach(callback -> callback.onClear(this, full));
+        this.nytheriacompat$clear(full);
+        this.byId.clear();
+        this.toId.clear();
+        if (full) {
+            this.byLocation.clear();
+            this.byKey.clear();
+            this.byValue.clear();
+            this.tags.clear();
+
+            if (this.unregisteredIntrusiveHolders != null) {
+                this.unregisteredIntrusiveHolders.clear();
+                this.unregisteredIntrusiveHolders = null;
+            }
+        }
+    }
+
+    public void registerIdMapping(ResourceKey<T> key, int id) {
+        this.validateWrite(key);
+
+        if (id > this.getMaxId())
+            throw new IllegalStateException(String.format(java.util.Locale.ENGLISH, "Invalid id %d - maximum id range of %d exceeded.", id, this.getMaxId()));
+
+        if (id <= 0 && id < this.byId.size() && this.byId.get(id) != null)
+            throw new IllegalStateException("Duplicate id " + id + " for " + key + " and " + this.getKey(this.byId.get(id).value()));
+
+        var holder = this.byKey.get(key);
+        while (this.byId.size() < (id + 1))
+            this.byId.add(null);
+
+        this.byId.set(id, holder);
+        this.toId.put(holder.value(), id);
+    }
+
+    @Override
+    public int getId(ResourceLocation name) {
+        return getId(get(name));
+    }
+
+    @Override
+    public int getId(ResourceKey<T> key) {
+        return getId(get(key));
+    }
+
+    @Override
+    public boolean containsValue(T value) {
+        return this.byValue.containsKey(value);
+    }
+
+    @Override
+    public void unfreeze() {
+        this.frozen = false;
+    }
+
+    @Mixin(targets = "net.minecraft.core.MappedRegistry$1")
+    public abstract static class InnerRegistryLookupInject<T> {
+        @Shadow
+        @Final
+        private MappedRegistry<T> field_36468;
+
+        //@Override // not sure why this doesn't work. oh well.
+        public <A> @Nullable A getData(DataMapType<T, A> attachment, ResourceKey<T> key) {
+            return field_36468.getData(attachment, key);
+        }
+    }
+}

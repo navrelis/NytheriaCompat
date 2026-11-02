@@ -1,0 +1,22 @@
+# Changed by the Nytheria Compat project between 2026-09-29 and 2026-11-02; see docs/CHANGES.md.
+# Based on Kilt by KiltMC (https://github.com/KiltMC/Kilt). Licensed under the GNU LGPL 2.1.
+
+modLoader="javafml"
+loaderVersion="[4,]"
+issueTrackerURL=""
+logoFile=""
+license=""
+
+[[mods]]
+modId="unknown"
+# We use the global forge version
+version="0.0.0"
+updateJSONURL=""
+displayName="Unknown Nytheria Compat Mod Jar"
+credits=""
+authors=""
+description='''
+This is a jar that has been JiJ'd by a Forge mod, but doesn't provide any mods.toml for metadata.
+This also should *not* be visible whatsoever to the end user, so if you are seeing this description,
+please report it as a Nytheria Compat bug.
+'''

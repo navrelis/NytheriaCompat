@@ -1,0 +1,27 @@
+{
+    "schemaVersion": 1,
+    "id": "nytheria_compat_fabric_compat",
+    "version": "${version}",
+    "name": "Nytheria Compat: Fabric Mods Compat",
+    "description": "A compatibility layer to add support between Nytheria Compat and other Fabric mods.",
+    "authors": [
+        "BluSpring"
+    ],
+    "license": "MIT",
+    "icon": "icon.png",
+    "environment": "*",
+    "mixins": [
+        "nytheria_compat_fabric_compats.mixins.json"
+    ],
+    "depends": {
+        "fabricloader": ">=${loader_version}",
+        "minecraft": "${minecraft_version}",
+        "fabric-language-kotlin": ">=${fabric_kotlin_version}",
+        "nytheria_compat": "*"
+    },
+    "custom": {
+        "modmenu": {
+            "parent": "nytheria_compat"
+        }
+    }
+}

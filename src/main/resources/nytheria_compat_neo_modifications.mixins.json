@@ -1,0 +1,21 @@
+{
+    "required": true,
+    "minVersion": "0.8",
+    "package": "dev.nytheria.compat.modifications",
+    "plugin": "dev.nytheria.compat.NytheriaCompatMixinPlugin",
+    "compatibilityLevel": "JAVA_21",
+    "mixins": [
+    ],
+    "client": [
+    ],
+    "injectors": {
+        "defaultRequire": 1
+    },
+    "mixinPriority": 950,
+    "mixinextras": {
+        "minVersion": "0.5.0"
+    },
+    "overwrites": {
+        "conformVisibility": true
+    }
+}

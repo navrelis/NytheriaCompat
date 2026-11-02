@@ -1,0 +1,12 @@
+{
+  "values": [
+    {
+      "id": "cataclysm:coral_spear",
+      "required": false
+    },
+    {
+      "id": "cataclysm:coral_bardiche",
+      "required": false
+    }
+  ]
+}

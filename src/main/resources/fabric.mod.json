@@ -1,0 +1,73 @@
+{
+    "schemaVersion": 1,
+    "id": "nytheria_compat",
+    "version": "${version}",
+    "name": "Nytheria Compat",
+    "description": "Internal dependency of the Nytheria modpack, not for other packs: based on Kilt by BluSpring, AlphaMode and contributors, it runs Cataclysm, Astral Dimension, Lionfish API and Curios (NeoForge 1.21.1) on Fabric and no other NeoForge mod.",
+    "authors": [
+        "Nytheria Team"
+    ],
+    "contributors": [
+        "BluSpring",
+        "AlphaMode"
+    ],
+    "contact": {
+        "homepage": "https://github.com/navrelis/NytheriaCompat",
+        "sources": "https://github.com/navrelis/NytheriaCompat",
+        "issues": "https://github.com/navrelis/NytheriaCompat/issues"
+    },
+    "provides": [
+        "kilt"
+    ],
+    "license": "LGPL-2.1-only",
+    "icon": "assets/nytheria_compat/icon.png",
+    "environment": "*",
+    "entrypoints": {
+        "client": [
+            "dev.nytheria.compat.client.NytheriaCompatClient"
+        ],
+        "main": [
+            "dev.nytheria.compat.NytheriaCompat"
+        ],
+        "server": [
+            "dev.nytheria.compat.server.dedicated.NytheriaCompatDedicatedServer"
+        ],
+        "mm_kilt:early_risers": [
+            "dev.nytheria.compat.loader.asm.NytheriaCompatEarlyRiser"
+        ],
+        "mixinsquared-adjuster": [
+            "dev.nytheria.compat.loader.mixin.NytheriaCompatAnnotationAdjuster"
+        ],
+        "mixinsquared": [
+            "dev.nytheria.compat.loader.mixin.NytheriaCompatMixinCanceller"
+        ],
+        "afl:instrumentation": [
+            "dev.nytheria.compat.loader.asm.NytheriaCompatInstrumentationHandler"
+        ]
+    },
+    "mixins": [
+        "nytheria_compat.mixins.json",
+        "nytheria_compat_neo_injects.mixins.json",
+        "nytheria_compat_neo_modifications.mixins.json"
+    ],
+    "depends": {
+        "fabricloader": ">=${loader_version}",
+        "fabric-api": ">=${fabric_version}",
+        "minecraft": "${minecraft_version}",
+        "fabric-language-kotlin": ">=${fabric_kotlin_version}",
+        "mm_nytheria_compat": ">=${fabric_asm_version}"
+    },
+    "custom": {
+        "nytheria_compat:access_transformer": [
+            "META-INF/accesstransformer.cfg"
+        ],
+        "afl:classtransform": "nytheria_compat.classtransform.json"
+    },
+    "breaks": {
+        "quilt_loader": "*",
+        "async": "*",
+        "creativecore": "<2.12.33",
+        "embeddium": "*"
+    },
+    "accessWidener": "nytheria_compat.classtweaker"
+}

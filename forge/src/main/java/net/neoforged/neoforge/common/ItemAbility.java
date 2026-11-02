@@ -1,0 +1,66 @@
+/*
+ * Copyright (c) Forge Development LLC and contributors
+ * SPDX-License-Identifier: LGPL-2.1-only
+ */
+
+/*
+ * Changed by the Nytheria Compat project between 2026-09-29 and 2026-11-02; see docs/CHANGES.md.
+ * Based on NeoForge by NeoForged, as ported by KiltMC (see VENDORED.md). Licensed under the GNU LGPL 2.1.
+ */
+
+package net.neoforged.neoforge.common;
+
+import com.mojang.serialization.Codec;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+public final class ItemAbility {
+    private static final Map<String, ItemAbility> actions = new ConcurrentHashMap<>();
+
+    public static Codec<ItemAbility> CODEC = Codec.STRING.xmap(ItemAbility::get, ItemAbility::name);
+
+    /**
+     * Returns all registered actions.
+     * This collection can be kept around, and will update itself in response to changes to the map.
+     * See {@link ConcurrentHashMap#values()} for details.
+     */
+    public static Collection<ItemAbility> getActions() {
+        return Collections.unmodifiableCollection(actions.values());
+    }
+
+    /**
+     * Gets or creates a new ItemAbility for the given name.
+     */
+    public static ItemAbility get(String name) {
+        return actions.computeIfAbsent(name, ItemAbility::new);
+    }
+
+    public static @Nullable ItemAbility nytheriacompat$getNullable(String name) {
+        return actions.get(name);
+    }
+
+    /**
+     * Returns the name of this item ability
+     */
+    public String name() {
+        return name;
+    }
+
+    @Override
+    public String toString() {
+        return "ItemAbility[" + name + "]";
+    }
+
+    private final String name;
+
+    /**
+     * Use {@link #get(String)} to get or create a ItemAbility
+     */
+    private ItemAbility(String name) {
+        this.name = name;
+    }
+}

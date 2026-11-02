@@ -1,0 +1,101 @@
+/*
+ * Copyright (c) NeoForged and contributors
+ * SPDX-License-Identifier: LGPL-2.1-only
+ */
+
+/*
+ * Changed by the Nytheria Compat project between 2026-09-29 and 2026-11-02; see docs/CHANGES.md.
+ * Based on NeoForge by NeoForged, as ported by KiltMC (see VENDORED.md). Licensed under the GNU LGPL 2.1.
+ */
+
+package net.neoforged.neoforge.common.util;
+
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.Optional;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentContents;
+import net.minecraft.network.chat.FormattedText;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.contents.TranslatableContents;
+import net.minecraft.util.ExtraCodecs;
+import org.jetbrains.annotations.ApiStatus;
+
+@ApiStatus.Internal
+public record InsertingContents(int index) implements ComponentContents {
+    public static final MapCodec<InsertingContents> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
+            ExtraCodecs.NON_NEGATIVE_INT.fieldOf("index").forGetter(InsertingContents::index))
+            .apply(i, InsertingContents::new));
+
+    public static final ComponentContents.Type<InsertingContents> TYPE = new ComponentContents.Type<>(CODEC, "neoforge:inserting");
+
+    private static final ThreadLocal<Deque<TranslatableContents>> TRANSLATION_STACK = ThreadLocal.withInitial(ArrayDeque::new);
+
+    @ApiStatus.Internal
+    public static boolean pushTranslation(TranslatableContents contents) {
+        for (TranslatableContents other : TRANSLATION_STACK.get()) {
+            if (contents == other) {
+                return false;
+            }
+        }
+
+        TRANSLATION_STACK.get().push(contents);
+        return true;
+    }
+
+    @ApiStatus.Internal
+    public static void popTranslation() {
+        TRANSLATION_STACK.get().pop();
+    }
+
+    // Nytheria Compat: make sure it actually exists in here first.
+    @ApiStatus.Internal
+    public static boolean nytheriacompat$hasTranslationInStack(TranslatableContents contents) {
+        for (TranslatableContents other : TRANSLATION_STACK.get()) {
+            if (contents == other) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    @Override
+    public <T> Optional<T> visit(FormattedText.ContentConsumer<T> visitor) {
+        var translation = TRANSLATION_STACK.get().peek();
+
+        if (translation == null || translation.getArgs().length <= index)
+            return visitor.accept("%" + (index + 1) + "$s");
+
+        Object arg = translation.getArgs()[index];
+
+        if (arg instanceof Component component) {
+            return component.visit(visitor);
+        } else {
+            return visitor.accept(arg.toString());
+        }
+    }
+
+    @Override
+    public <T> Optional<T> visit(FormattedText.StyledContentConsumer<T> visitor, Style style) {
+        var translation = TRANSLATION_STACK.get().peek();
+
+        if (translation == null || translation.getArgs().length <= index)
+            return visitor.accept(style, "%" + (index + 1) + "$s");
+
+        Object arg = translation.getArgs()[index];
+
+        if (arg instanceof Component component) {
+            return component.visit(visitor, style);
+        } else {
+            return visitor.accept(style, arg.toString());
+        }
+    }
+
+    @Override
+    public Type<?> type() {
+        return TYPE;
+    }
+}
