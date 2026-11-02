@@ -13,6 +13,10 @@ comes directly after it. The script `tools/licence/add-change-notices.py` (Pytho
 finds the modified files with git and refreshes these notices; `--check` only reports files whose notice is missing or
 out of date.
 
+## Nytheria Compat 1.0.1 (2026-11-02)
+
+The mod lock accepts the Fabric mod `nytheriaquests` (Nytheria Quests, the renamed QuestBridge) or `questbridge` as the first core mod; `tickmender` is still required. Nothing else changed.
+
 ## Nytheria Compat 1.0.0 (formerly Sporran, released 2026-11-02)
 
 Compared with Kilt v21.1.13 (and with Sporran 1.0.2, the last release before this one). This is the first release under the

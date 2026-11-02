@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test;
  * {@link ModLock}: what Nytheria Compat refuses at startup. Plain unit test, no game classes.
  */
 public class ModLockTest {
-    private static final Set<String> CORE = Set.of("questbridge", "tickmender");
+    private static final Set<String> CORE = Set.of("nytheriaquests", "tickmender");
     private static final List<FoundMod> FOUR = List.of(
             new FoundMod("cataclysm.jar", "cataclysm", false),
             new FoundMod("astral.jar", "astral_dimension", false),
@@ -59,9 +59,24 @@ public class ModLockTest {
 
     @Test
     void aMissingCoreModIsNamed() {
-        var problems = ModLock.INSTANCE.check(FOUR, Set.of("questbridge"));
-        assertEquals(1, problems.size());
-        assertTrue(problems.get(0).contains("tickmender"), problems.get(0));
+        var problems = ModLock.INSTANCE.check(FOUR, Set.of("nytheriaquests"));
+        assertEquals(List.of("Required Fabric mod tickmender is missing."), problems);
+    }
+
+    @Test
+    void theOldQuestBridgeIdAlsoPasses() {
+        assertEquals(List.of(), ModLock.INSTANCE.check(FOUR, Set.of("questbridge", "tickmender")));
+    }
+
+    @Test
+    void bothQuestIdsPass() {
+        assertEquals(List.of(), ModLock.INSTANCE.check(FOUR, Set.of("nytheriaquests", "questbridge", "tickmender")));
+    }
+
+    @Test
+    void neitherQuestIdNamesBoth() {
+        var problems = ModLock.INSTANCE.check(FOUR, Set.of("tickmender"));
+        assertEquals(List.of("Required Fabric mod nytheriaquests (or questbridge) is missing."), problems);
     }
 
     @Test
