@@ -1,5 +1,5 @@
 /*
- * Changed by the Nytheria Compat project between 2026-09-29 and 2026-11-02; see docs/CHANGES.md.
+ * Changed by the Nytheria Compat project between 2026-09-29 and 2026-11-08; see docs/CHANGES.md.
  * Based on Kilt by KiltMC (https://github.com/KiltMC/Kilt). Licensed under the GNU LGPL 2.1.
  */
 
@@ -141,7 +141,7 @@ class NytheriaCompatLoader : KnitModLoader<NeoForgeMod>(NytheriaCompat.MOD_ID, "
                 JarFile(path.toFile()).use { found += ModJars.nestedMods(it, path.name) }
         }
 
-        val problems = ModLock.check(found, FabricLoader.getInstance().allMods.map { it.metadata.id })
+        val problems = ModLock.check(found, FabricLoader.getInstance().allMods.map { ModLock.FabricMod(it.metadata.id, it.metadata.provides) })
         if (problems.isNotEmpty()) {
             val message = (listOf(ModLock.REFUSED_TEXT) + problems).joinToString("\n")
             NytheriaCompat.logger.error(message)

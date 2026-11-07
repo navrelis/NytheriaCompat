@@ -1,4 +1,4 @@
-<!-- Changed by the Nytheria Compat project between 2026-09-29 and 2026-11-02; see docs/CHANGES.md. -->
+<!-- Changed by the Nytheria Compat project between 2026-09-29 and 2026-11-08; see docs/CHANGES.md. -->
 <!-- Based on Kilt by KiltMC (https://github.com/KiltMC/Kilt). Licensed under the GNU LGPL 2.1. -->
 
 # Nytheria Compat
@@ -35,7 +35,7 @@ do not want their mods used on Fabric; please respect that.
 
 ## Scope
 
-Nytheria Compat 1.0.0 runs these NeoForge 1.21.1 mods and no others:
+Nytheria Compat runs these NeoForge 1.21.1 mods and no others:
 
 - L_Ender's Cataclysm 3.33
 - Astral Dimension 3.0
@@ -54,9 +54,9 @@ Everything in this table is required on **both the client and the server**, exce
 | Minecraft | 1.21.1 | |
 | Java | 21 | |
 | [Fabric Loader](https://fabricmc.net/use/) | 0.19.5 or newer | `fabric.mod.json` only enforces 0.19.3, deliberately, but use 0.19.5 or newer. |
-| [Fabric API](https://modrinth.com/mod/fabric-api) | 0.116.17+1.21.1 (tested) | |
-| [Fabric Language Kotlin](https://modrinth.com/mod/fabric-language-kotlin) | 1.14.1+kotlin.2.4.20 (tested) | This version needs Fabric Loader 0.19.5 or newer. |
-| Nytheria Compat (`NytheriaCompat-<version>.jar`) | 1.0.0 | Comes with Nytheria. The source of every release is in this repository ([tags](https://github.com/navrelis/NytheriaCompat/tags)). |
+| [Fabric API](https://modrinth.com/mod/fabric-api) | 0.116.14+1.21.1 or newer | |
+| [Fabric Language Kotlin](https://modrinth.com/mod/fabric-language-kotlin) | 1.13.12+kotlin.2.4.0 or newer | |
+| Nytheria Compat (`NytheriaCompat-<version>.jar`) | 1.0.2 | Comes with Nytheria. The source of every release is in this repository ([tags](https://github.com/navrelis/NytheriaCompat/tags)). |
 
 On top of that, you need the NeoForge 1.21.1 jars of the four mods above that you want to play. Get them from their
 authors' official pages (for example their CurseForge or Modrinth pages), and respect each mod's licence and the wishes

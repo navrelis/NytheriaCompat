@@ -9,6 +9,8 @@ object ModLock {
     @JvmField val ALLOWED_NEOFORGE_MODS = setOf("cataclysm", "astral_dimension", "lionfishapi", "curios")
 
     // Fabric mods that must be present, any version. A group needs one of its ids; questbridge is the old id of nytheriaquests.
+    //  An id counts as present when a loaded mod has it as its id or in its Fabric `provides` (like FabricLoader.isModLoaded), so a core mod
+    //  renamed with its old id kept in `provides` stays accepted.
     val REQUIRED_FABRIC_MODS = listOf(listOf("nytheriaquests", "questbridge"), listOf("tickmender"))
 
     const val REFUSED_TEXT = "Nytheria Compat only runs inside the Nytheria modpack; to run other NeoForge mods on Fabric, use Kilt, https://github.com/KiltMC/Kilt."
@@ -16,11 +18,15 @@ object ModLock {
     /** A mod id from a `neoforge.mods.toml`. [fabricJar]: Fabric Loader runs this jar as a Fabric mod, Nytheria Compat does not load it. */
     data class FoundMod(val jar: String, val modId: String, val fabricJar: Boolean)
 
+    /** A loaded Fabric mod: its id and the ids it provides (`provides` in its fabric.mod.json). */
+    data class FabricMod(val id: String, val provides: Collection<String>)
+
     /** What is wrong with this set of mods, one line per problem. Empty means the game may start. */
-    fun check(found: List<FoundMod>, fabricModIds: Collection<String>): List<String> {
+    fun check(found: List<FoundMod>, fabricMods: Collection<FabricMod>): List<String> {
         val refused = found.filter { !it.fabricJar && it.modId !in ALLOWED_NEOFORGE_MODS }
             .map { "NeoForge mod ${it.modId} in ${it.jar} is not allowed." }
-        val missing = REQUIRED_FABRIC_MODS.filter { group -> group.none { it in fabricModIds } }
+        val presentIds = fabricMods.flatMapTo(HashSet()) { listOf(it.id) + it.provides }
+        val missing = REQUIRED_FABRIC_MODS.filter { group -> group.none { it in presentIds } }
             .map { "Required Fabric mod ${it.first()}${it.drop(1).joinToString("") { id -> " (or $id)" }} is missing." }
 
         return refused + missing

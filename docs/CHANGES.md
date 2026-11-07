@@ -13,6 +13,10 @@ comes directly after it. The script `tools/licence/add-change-notices.py` (Pytho
 finds the modified files with git and refreshes these notices; `--check` only reports files whose notice is missing or
 out of date.
 
+## Nytheria Compat 1.0.2 (2026-11-08)
+
+The mod lock counts a required core mod as present when a loaded Fabric mod has its id or lists it in `provides` (as `FabricLoader.isModLoaded` does). Required mods and the allowed NeoForge mods are unchanged.
+
 ## Nytheria Compat 1.0.1 (2026-11-02)
 
 The mod lock accepts the Fabric mod `nytheriaquests` (Nytheria Quests, the renamed QuestBridge) or `questbridge` as the first core mod; `tickmender` is still required. Nothing else changed.
