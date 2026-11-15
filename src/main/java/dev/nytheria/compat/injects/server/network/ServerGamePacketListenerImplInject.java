@@ -1,6 +1,6 @@
 // TRACKED HASH: 1886f30859644767992d36dcae1264c9b9614cd4
 /*
- * Changed by the Nytheria Compat project between 2026-09-29 and 2026-11-02; see docs/CHANGES.md.
+ * Changed by the Nytheria Compat project between 2026-09-29 and 2026-11-15; see docs/CHANGES.md.
  * Based on Kilt by KiltMC (https://github.com/KiltMC/Kilt). Licensed under the GNU LGPL 2.1.
  */
 
@@ -37,6 +37,14 @@ public abstract class ServerGamePacketListenerImplInject extends ServerCommonPac
     private void nytheriacompat$resyncPlayerWithVehicleOnMove(Entity instance, double x, double y, double z, float yRot, float xRot, Operation<Void> original) {
         original.call(instance, x, y, z, yRot, xRot);
         this.resyncPlayerWithVehicle(instance);
+    }
+
+    // Nytheria Compat: NeoForge calls player.checkRidingStatistics(dx, dy, dz) right after checkMovementStatistics, with the same vehicle delta. The resync above makes
+    //  the player's position delta in ServerPlayer.rideTick 0, so without this no boat/horse/pig/strider/camel riding stat is ever awarded for a client-controlled vehicle.
+    @WrapOperation(method = "handleMoveVehicle", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;checkMovementStatistics(DDD)V"))
+    private void nytheriacompat$checkRidingStatisticsOnMoveVehicle(ServerPlayer instance, double dx, double dy, double dz, Operation<Void> original) {
+        original.call(instance, dx, dy, dz);
+        instance.checkRidingStatistics(dx, dy, dz);
     }
 
     @Unique

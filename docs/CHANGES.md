@@ -13,6 +13,10 @@ comes directly after it. The script `tools/licence/add-change-notices.py` (Pytho
 finds the modified files with git and refreshes these notices; `--check` only reports files whose notice is missing or
 out of date.
 
+## Nytheria Compat 1.0.3 (2026-11-15)
+
+A vehicle the player steers from the client (boat, horse, pig, strider, camel) now counts towards the riding statistics (`boat_one_cm`, `horse_one_cm`, ...). The move-vehicle patch ported from NeoForge resynced the player with the vehicle but left out NeoForge's following `checkRidingStatistics` call, so these statistics stayed at 0 for every player.
+
 ## Nytheria Compat 1.0.2 (2026-11-08)
 
 The mod lock counts a required core mod as present when a loaded Fabric mod has its id or lists it in `provides` (as `FabricLoader.isModLoaded` does). Required mods and the allowed NeoForge mods are unchanged.
