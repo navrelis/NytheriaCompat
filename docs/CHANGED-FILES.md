@@ -9,7 +9,7 @@ These files came from upstream and were changed by the Nytheria Compat project, 
 - `forge/src/main/resources/META-INF/accesstransformer.cfg` - changed by the Nytheria Compat project on 2026-11-01
 - `loader/fabric/src/main/resources/fabric.mod.json` - changed by the Nytheria Compat project on 2026-09-29
 - `src/gametest/resources/fabric.mod.json` - changed by the Nytheria Compat project between 2026-09-29 and 2026-11-02
-- `src/main/resources/assets/nytheria_compat/icon.png` - changed by the Nytheria Compat project between 2026-09-29 and 2026-11-02
+- `src/main/resources/assets/nytheria_compat/icon.png` - changed by the Nytheria Compat project between 2026-09-29 and 2026-11-22
 - `src/main/resources/fabric.mod.json` - changed by the Nytheria Compat project between 2026-09-29 and 2026-11-02
 - `src/main/resources/nytheria_compat.classtransform.json` - changed by the Nytheria Compat project between 2026-09-29 and 2026-11-02
 - `src/main/resources/nytheria_compat.mixins.json` - changed by the Nytheria Compat project between 2026-09-29 and 2026-11-02
